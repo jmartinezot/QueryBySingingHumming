@@ -18,7 +18,7 @@
 #include "STypes.h"
 
 /*  Compare two float value, this function is mainly used for qsort */
-int _compareFloat(const void *a, const void *b);
+extern int _compareFloat(const void *a, const void *b);
 
 /*
 *  For reading song melody DB's associated information, such as

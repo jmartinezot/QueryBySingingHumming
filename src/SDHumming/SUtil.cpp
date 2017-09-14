@@ -12,9 +12,9 @@
 #include "SUtil.h"
 
 /*  Compare two float value, this function is mainly used for qsort */
-int _compareFloat(const void *a, const void *b){
+/*int _compareFloat(const void *a, const void *b){
 	return (*(float*)a > *(float*)b)? 1:-1; 
-}
+}*/
 
 
 

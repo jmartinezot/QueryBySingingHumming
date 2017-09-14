@@ -117,6 +117,38 @@ typedef  struct WAVE_HEADERTag{
 	long Pcmfilelen;
 }WAVE_HEADER;
 
+/*typedef  struct WAVE_HEADERTag{
+	char RIFF[4];
+	int Whgilelen;
+	char WAVEfmt[8];
+	int version;
+	short  FormatTag;
+	short  Channels;
+	int SamplePerSec;
+	int AvgBytesPerSec;
+	short  blockalign;
+	short  BitPerSample;
+	char data[4];
+	int Pcmfilelen;
+}WAVE_HEADER;*/
+
+/*typedef struct header_file
+{
+    char chunk_id[4];
+    int chunk_size;
+    char format[4];
+    char subchunk1_id[4];
+    int subchunk1_size;
+    short int audio_format;
+    short int num_channels;
+    int sample_rate;            
+    int byte_rate;
+    short int block_align;
+    short int bits_per_sample;
+    char subchunk2_id[4];
+    int subchunk2_size;         
+} header;*/
+
 typedef struct SPolar{
 	double M;  /* magnitude */
 	double P;  /* phase */

@@ -33,6 +33,6 @@ void SPreprocessMelodyDB(float* pitch_array,int& Len,int SourceLen,float Ratio);
 float Min3(float in1,float in2,float in3);
 
 /*  Compare two float value, this function is mainly used for qsort */
-int _compareFloat(const void *a, const void *b);
+extern int _compareFloat(const void *a, const void *b);
 
 #endif

@@ -36,6 +36,7 @@ int SPitchExtraction(SWaveDataStru mySWaveDataStru, float pendiente, float fmin,
 	nIndexMin = (int)floor(fs/fmax);
 	nFrameSpan = nFrmWinLen + nIndexMax + 1;
 	nTotalFrms = (int)floor((float)((nDataLen-(nFrameSpan+nFrmShtLen))/nFrmShtLen))+1;
+    printf("nTotalFrms: %d", nTotalFrms);
 	
 	/* compute energy curve */
 	float *pEnergy=NULL;
@@ -97,17 +98,32 @@ int WaveRead(char* filename, SWaveDataStru &mySWaveDataStru){
 	short *pBuffer=NULL;
 	FILE *fp = fopen(filename, "rb");
 	if (!fp) {
+        printf("ERROR_CODE_FILE_CANNOT_OPEN\n");
 		return ERROR_CODE_FILE_CANNOT_OPEN;
 	}
 	fseek(fp, 0, SEEK_END);
 	nLen = (ftell(fp)-44);
 	pBuffer = new short[nLen];
 	if (!pBuffer) {
+        printf("ERROR_CODE_CANNOT_ALLOC_MEM\n");
 		return ERROR_CODE_CANNOT_ALLOC_MEM;
 	}
 
 	fseek(fp, 0, SEEK_SET);
 	nRead=fread(&szHeader, sizeof(WAVE_HEADER), 1, fp);
+
+	printf("RIFF: %s\n", szHeader.RIFF);
+    printf("Whgilelen: %d\n", (int) szHeader.Whgilelen);
+    printf("WAVEfmt: %s\n", szHeader.WAVEfmt);
+    printf("version: %d\n", (int) szHeader.version);
+    printf("FormatTag: %d\n", (int) szHeader.FormatTag);
+    printf("Channels: %d\n", (int) szHeader.Channels);
+    printf("SamplePerSec: %d\n", (int) szHeader.SamplePerSec);
+    printf("AvgBytesPerSec: %d\n", (int) szHeader.AvgBytesPerSec);
+    printf("blockalign: %d\n", (int) szHeader.blockalign);
+    printf("BitPerSample: %d\n", (int) szHeader.BitPerSample);
+    printf("data: %s\n", szHeader.data);
+    printf("Pcmfilelen: %d\n", (int) szHeader.Pcmfilelen);
 
     if(szHeader.BitPerSample==8){
             char *TmpBuf=new char[nLen];
@@ -127,6 +143,7 @@ int WaveRead(char* filename, SWaveDataStru &mySWaveDataStru){
             nRead=fread(pBuffer, sizeof(short), nLen, fp);
 
     }else{
+            printf ("szHeader.BitPerSample: %d\n", (int)szHeader.BitPerSample);
             printf("wav header error\n");
             return -1;
     }
