@@ -90,6 +90,115 @@ void NormalizeData(float *data, int nLen, float max){
 	}
 }
 
+/* wave header struct */ 
+/* typedef  struct WAVE_HEADERTag{
+	char RIFF[4];
+	long Whgilelen;
+	char WAVEfmt[8];
+	long version;
+	short  FormatTag;
+	short  Channels;
+	long SamplePerSec;
+	long AvgBytesPerSec;
+	short  blockalign;
+	short  BitPerSample;
+	char data[4];
+	long Pcmfilelen;
+}WAVE_HEADER;*/
+
+
+int WaveRead2(char* filename, SWaveDataStru &mySWaveDataStru){
+    AudioFile<float> audioFile;
+    audioFile.load(filename);
+    audioFile.printSummary();
+
+    WAVE_HEADER szHeader;
+	int nRead=0;
+	int nLen=0;
+	short *pBuffer=NULL;
+	FILE *fp = fopen(filename, "rb");
+	if (!fp) {
+        printf("ERROR_CODE_FILE_CANNOT_OPEN\n");
+		return ERROR_CODE_FILE_CANNOT_OPEN;
+	}
+	fseek(fp, 0, SEEK_END);
+	nLen = (ftell(fp)-44);
+	pBuffer = new short[nLen];
+	if (!pBuffer) {
+        printf("ERROR_CODE_CANNOT_ALLOC_MEM\n");
+		return ERROR_CODE_CANNOT_ALLOC_MEM;
+	}
+
+    printf("nLen: %d\n", nLen);
+    printf("NumSamplesPerChannel: %d\n", audioFile.getNumSamplesPerChannel());
+
+    szHeader.BitPerSample = (short)audioFile.getBitDepth();
+    szHeader.SamplePerSec = (long) audioFile.getSampleRate();
+
+    /*for (int i = 0; i < audioFile.getNumSamplesPerChannel(); i++)
+        printf("%5.15f ", audioFile.samples[0][i]);*/
+
+	printf("RIFF: %s\n", szHeader.RIFF);
+    printf("Whgilelen: %d\n", (int) szHeader.Whgilelen);
+    printf("WAVEfmt: %s\n", szHeader.WAVEfmt);
+    printf("version: %d\n", (int) szHeader.version);
+    printf("FormatTag: %d\n", (int) szHeader.FormatTag);
+    printf("Channels: %d\n", (int) szHeader.Channels);
+    printf("SamplePerSec: %d\n", (int) szHeader.SamplePerSec);
+    printf("AvgBytesPerSec: %d\n", (int) szHeader.AvgBytesPerSec);
+    printf("blockalign: %d\n", (int) szHeader.blockalign);
+    printf("BitPerSample: %d\n", (int) szHeader.BitPerSample);
+    printf("data: %s\n", szHeader.data);
+    printf("Pcmfilelen: %d\n", (int) szHeader.Pcmfilelen);
+
+    if(szHeader.BitPerSample==8){
+            char *TmpBuf=new char[nLen];
+            nRead=fread(TmpBuf, sizeof(char), nLen, fp);
+            pBuffer = new short[nLen];
+            for(int i=0;i<nLen;i++){
+                    pBuffer[i]=(TmpBuf[i]-128)/128.0*32768;
+            }
+
+            delete[] TmpBuf;
+    }else if(szHeader.BitPerSample==16){
+            nLen/=2;
+            pBuffer = new short[nLen];
+            if (!pBuffer) {
+                    return ERROR_CODE_CANNOT_ALLOC_MEM;
+            }
+            nRead=fread(pBuffer, sizeof(short), nLen, fp);
+
+    }else{
+            printf ("szHeader.BitPerSample: %d\n", (int)szHeader.BitPerSample);
+            printf("wav header error\n");
+            return -1;
+    }
+
+	mySWaveDataStru.fs=szHeader.SamplePerSec;
+	mySWaveDataStru.nDataLen=nLen;
+	mySWaveDataStru.fDataBuf=new float[nLen];
+	if (!mySWaveDataStru.fDataBuf) {
+		return ERROR_CODE_CANNOT_ALLOC_MEM;
+	}
+
+	for(int i=0;i<nLen;i++){
+		mySWaveDataStru.fDataBuf[i]=pBuffer[i]/32768.0f;
+	}
+
+	NormalizeData(mySWaveDataStru.fDataBuf, mySWaveDataStru.nDataLen,0.9f);
+
+	for(int i=0;i<nLen;i++){
+		mySWaveDataStru.fDataBuf[i]=audioFile.samples[0][i];
+	}
+    NormalizeData(mySWaveDataStru.fDataBuf, mySWaveDataStru.nDataLen,0.9f);
+
+	delete[] pBuffer;
+    
+    printf("End of WaveRead2\n");
+
+    return 0;
+}
+
 /* read wave data from file */
 int WaveRead(char* filename, SWaveDataStru &mySWaveDataStru){
 	WAVE_HEADER szHeader;
@@ -166,13 +275,16 @@ int WaveRead(char* filename, SWaveDataStru &mySWaveDataStru){
 /* extract pitch contour of the input sound file */
 int SPitchContourExtraction(char* filename,float*& fPitchData,int &nFrm){
 	SWaveDataStru mySWaveDataStru;
-	if(WaveRead(filename,mySWaveDataStru)!=0){
-		printf("Error on WaveRead\n");
+	if(WaveRead2(filename,mySWaveDataStru)!=0){
+		printf("Error on WaveRead2\n");
 		return -1;
 	}
+    printf("SPitchContourExtraction 1\n");
 	mySWaveDataStru.fs=8000;
 	SPitchExtraction(mySWaveDataStru, 0.0015f, MIN_PITCH_VALUE, MAX_PITCH_VALUE, 50, 500,fPitchData,nFrm);
+    printf("SPitchContourExtraction 2\n");
 	delete[] mySWaveDataStru.fDataBuf;
+    printf("SPitchContourExtraction 3\n");
 	return 0;
 } 
 

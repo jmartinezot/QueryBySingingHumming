@@ -16,6 +16,8 @@
 #include "SUtil.h"
 #include "STypes.h"
 
+#include "AudioFile.h"
+
 /* extract pitch contour of the input sound file */
 int SPitchContourExtraction(char* szInFile,float*& fPitchData,int &nFrm);
 
